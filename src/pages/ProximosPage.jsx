@@ -20,6 +20,16 @@ const FREQ_LABEL = {
   semestral: 'Semestral',
 }
 
+const TIPOS_FREQUENCIA = [
+  { value: 'diaria', label: 'Diária' },
+  { value: 'semanal', label: 'Semanal' },
+  { value: 'quinzenal', label: 'Quinzenal' },
+  { value: 'dias_especificos', label: 'Dias específicos' },
+  { value: 'mensal', label: 'Mensal' },
+  { value: 'trimestral', label: 'Trimestral' },
+  { value: 'semestral', label: 'Semestral' },
+]
+
 function formatarCabecalhoData(date, hoje) {
   const mesmodia = toISODate(date) === toISODate(hoje)
   const amanha = new Date(hoje)
@@ -36,6 +46,7 @@ export default function ProximosPage() {
   const [periodo, setPeriodo] = useState(7)
   const [unidades, setUnidades] = useState([])
   const [unidadeAtiva, setUnidadeAtiva] = useState('todas')
+  const [frequenciasAtivas, setFrequenciasAtivas] = useState([])
   const [ocorrenciasPorDia, setOcorrenciasPorDia] = useState([])
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState(null)
@@ -82,13 +93,21 @@ export default function ProximosPage() {
     carregar()
   }, [carregar])
 
+  function toggleFrequencia(value) {
+    setFrequenciasAtivas((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
+  }
+
   const gruposFiltrados = ocorrenciasPorDia
     .map((g) => ({
       ...g,
-      ocorrencias:
-        unidadeAtiva === 'todas'
-          ? g.ocorrencias
-          : g.ocorrencias.filter((o) => o.checklist_atividades?.unidade_id === unidadeAtiva),
+      ocorrencias: g.ocorrencias
+        .filter((o) => unidadeAtiva === 'todas' || o.checklist_atividades?.unidade_id === unidadeAtiva)
+        .filter(
+          (o) =>
+            frequenciasAtivas.length === 0 || frequenciasAtivas.includes(o.checklist_atividades?.frequencia)
+        ),
     }))
     .filter((g) => g.ocorrencias.length > 0)
 
@@ -127,7 +146,10 @@ export default function ProximosPage() {
       </div>
 
       {/* Filtro de unidade */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 18, overflowX: 'auto', paddingBottom: 2 }}>
+      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 6px 2px' }}>
+        Unidade
+      </p>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', paddingBottom: 2 }}>
         <button
           onClick={() => setUnidadeAtiva('todas')}
           style={{
@@ -163,6 +185,61 @@ export default function ProximosPage() {
             {u.nome}
           </button>
         ))}
+      </div>
+
+      {/* Filtro secundário: tipos de frequência (multi-seleção) */}
+      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: 0.5, margin: '0 0 6px 2px' }}>
+        Tipo de atividade
+      </p>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 18, overflowX: 'auto', paddingBottom: 2, flexWrap: 'wrap' }}>
+        {TIPOS_FREQUENCIA.map((f) => {
+          const marcado = frequenciasAtivas.includes(f.value)
+          return (
+            <button
+              key={f.value}
+              onClick={() => toggleFrequencia(f.value)}
+              style={{
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 999,
+                border: `1.5px solid ${marcado ? 'var(--blue)' : 'var(--border)'}`,
+                background: marcado ? 'var(--blue)' : 'transparent',
+                color: marcado ? '#0a0a0a' : 'var(--text-secondary)',
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: 'pointer',
+              }}
+            >
+              {marcado && (
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 13l4 4L19 7" stroke="#0a0a0a" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+              {f.label}
+            </button>
+          )
+        })}
+        {frequenciasAtivas.length > 0 && (
+          <button
+            onClick={() => setFrequenciasAtivas([])}
+            style={{
+              flexShrink: 0,
+              padding: '6px 12px',
+              borderRadius: 999,
+              border: '1.5px solid var(--border)',
+              background: 'transparent',
+              color: 'var(--text-tertiary)',
+              fontWeight: 700,
+              fontSize: 12,
+              cursor: 'pointer',
+            }}
+          >
+            Limpar ✕
+          </button>
+        )}
       </div>
 
       {erro && (
