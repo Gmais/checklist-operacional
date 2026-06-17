@@ -12,6 +12,7 @@ const emptyForm = {
   unidade_id: '',
   frequencia: 'diaria',
   dia_semana: 1,
+  dias_semana: [],
   semana_do_mes: 1,
   data_inicio: toISODate(new Date()),
 }
@@ -60,6 +61,7 @@ export default function AtividadesPage() {
       unidade_id: atividade.unidade_id,
       frequencia: atividade.frequencia,
       dia_semana: atividade.dia_semana ?? 1,
+      dias_semana: atividade.dias_semana || [],
       semana_do_mes: atividade.semana_do_mes ?? 1,
       data_inicio: atividade.data_inicio,
     })
@@ -77,9 +79,14 @@ export default function AtividadesPage() {
       setErro('Selecione a unidade.')
       return
     }
+    if (form.frequencia === 'dias_especificos' && form.dias_semana.length === 0) {
+      setErro('Selecione ao menos um dia da semana.')
+      return
+    }
 
     const precisaDia = ['semanal', 'quinzenal', 'mensal', 'trimestral', 'semestral'].includes(form.frequencia)
     const precisaSemanaDoMes = ['mensal', 'trimestral', 'semestral'].includes(form.frequencia)
+    const precisaDiasArray = form.frequencia === 'dias_especificos'
 
     const payload = {
       nome: form.nome.trim(),
@@ -87,6 +94,7 @@ export default function AtividadesPage() {
       unidade_id: form.unidade_id,
       frequencia: form.frequencia,
       dia_semana: precisaDia ? Number(form.dia_semana) : null,
+      dias_semana: precisaDiasArray ? form.dias_semana.slice().sort() : null,
       semana_do_mes: precisaSemanaDoMes ? Number(form.semana_do_mes) : null,
       data_inicio: form.data_inicio,
     }
@@ -122,6 +130,10 @@ export default function AtividadesPage() {
     if (a.frequencia === 'diaria') return 'Todo dia útil'
     if (a.frequencia === 'semanal') return `Toda ${DIA_LABEL[a.dia_semana]}-feira`
     if (a.frequencia === 'quinzenal') return `A cada 2 semanas, ${DIA_LABEL[a.dia_semana]}-feira`
+    if (a.frequencia === 'dias_especificos') {
+      const dias = (a.dias_semana || []).map((d) => `${DIA_LABEL[d]}-feira`)
+      return `Toda ${dias.join(' e ')}`
+    }
     return `${SEMANA_LABEL[a.semana_do_mes]} ${DIA_LABEL[a.dia_semana]}-feira do ${a.frequencia === 'mensal' ? 'mês' : a.frequencia === 'trimestral' ? 'trimestre' : 'semestre'}`
   }
 
@@ -223,6 +235,40 @@ export default function AtividadesPage() {
                   </option>
                 ))}
               </select>
+            </Field>
+          )}
+
+          {form.frequencia === 'dias_especificos' && (
+            <Field label="Dias da semana (pode marcar mais de um)">
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {DIAS_SEMANA_OPCOES.map((d) => {
+                  const marcado = form.dias_semana.includes(d.value)
+                  return (
+                    <button
+                      key={d.value}
+                      type="button"
+                      onClick={() => {
+                        const novos = marcado
+                          ? form.dias_semana.filter((v) => v !== d.value)
+                          : [...form.dias_semana, d.value]
+                        setForm({ ...form, dias_semana: novos })
+                      }}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: 999,
+                        border: `1.5px solid ${marcado ? 'var(--amber)' : 'var(--border)'}`,
+                        background: marcado ? 'var(--amber)' : 'transparent',
+                        color: marcado ? '#0a0a0a' : 'var(--text-secondary)',
+                        fontWeight: 700,
+                        fontSize: 13,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {d.label}
+                    </button>
+                  )
+                })}
+              </div>
             </Field>
           )}
 

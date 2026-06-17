@@ -96,6 +96,16 @@ export function calcularDatasPrevistas(atividade, rangeStart, rangeEnd) {
     return datas
   }
 
+  if (atividade.frequencia === 'dias_especificos') {
+    const dias = atividade.dias_semana || []
+    const d = new Date(start)
+    while (d <= rangeEnd) {
+      if (dias.includes(d.getDay())) datas.push(new Date(d))
+      d.setDate(d.getDate() + 1)
+    }
+    return datas
+  }
+
   if (atividade.frequencia === 'mensal' || atividade.frequencia === 'trimestral' || atividade.frequencia === 'semestral') {
     const passoMeses = atividade.frequencia === 'mensal' ? 1 : atividade.frequencia === 'trimestral' ? 3 : 6
     let cursor = new Date(inicio.getFullYear(), inicio.getMonth(), 1)
@@ -126,6 +136,7 @@ export const FREQUENCIAS = [
   { value: 'diaria', label: 'Diária' },
   { value: 'semanal', label: 'Semanal' },
   { value: 'quinzenal', label: 'Quinzenal' },
+  { value: 'dias_especificos', label: 'Dias específicos' },
   { value: 'mensal', label: 'Mensal' },
   { value: 'trimestral', label: 'Trimestral' },
   { value: 'semestral', label: 'Semestral' },

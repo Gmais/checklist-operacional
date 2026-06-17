@@ -4,6 +4,7 @@ const FREQ_LABEL = {
   diaria: 'Diária',
   semanal: 'Semanal',
   quinzenal: 'Quinzenal',
+  dias_especificos: 'Dias específicos',
   mensal: 'Mensal',
   trimestral: 'Trimestral',
   semestral: 'Semestral',
