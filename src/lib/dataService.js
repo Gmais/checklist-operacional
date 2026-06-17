@@ -57,6 +57,15 @@ export async function updateAtividade(id, patch) {
 }
 
 export async function deleteAtividade(id) {
+  // Remove ocorrências pendentes futuras/atuais vinculadas a essa atividade,
+  // preservando as já concluídas como histórico.
+  const { error: errorOcorrencias } = await supabase
+    .from('checklist_ocorrencias')
+    .delete()
+    .eq('atividade_id', id)
+    .eq('status', 'pendente')
+  if (errorOcorrencias) throw errorOcorrencias
+
   const { error } = await supabase.from('checklist_atividades').update({ ativo: false }).eq('id', id)
   if (error) throw error
 }
