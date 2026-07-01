@@ -10,7 +10,17 @@ const FREQ_LABEL = {
   semestral: 'Semestral',
 }
 
-export default function ActivityCard({ ocorrencia, atrasada, onConcluir, onReabrir, onReagendar }) {
+export default function ActivityCard({
+  ocorrencia,
+  atrasada,
+  onConcluir,
+  onReabrir,
+  onReagendar,
+  onMoverCima,
+  onMoverBaixo,
+  podeSubir,
+  podeDescer,
+}) {
   const [showObs, setShowObs] = useState(false)
   const [obs, setObs] = useState(ocorrencia.observacao || '')
   const [showReagendar, setShowReagendar] = useState(false)
@@ -250,6 +260,59 @@ export default function ActivityCard({ ocorrencia, atrasada, onConcluir, onReabr
           </div>
         )}
       </div>
+
+      {onMoverCima && (
+        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 2, width: 26 }}>
+          <button
+            onClick={() => onMoverCima(ocorrencia)}
+            disabled={!podeSubir}
+            aria-label="Mover para cima na ordem"
+            title="Mover para cima"
+            style={{
+              width: 26,
+              height: 16,
+              borderRadius: 6,
+              border: '1px solid var(--border)',
+              background: 'var(--bg-800)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: podeSubir ? 'pointer' : 'default',
+              color: podeSubir ? 'var(--text-secondary)' : 'var(--text-tertiary)',
+              opacity: podeSubir ? 1 : 0.35,
+              padding: 0,
+            }}
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+              <path d="M6 15l6-6 6 6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <button
+            onClick={() => onMoverBaixo(ocorrencia)}
+            disabled={!podeDescer}
+            aria-label="Mover para baixo na ordem"
+            title="Mover para baixo"
+            style={{
+              width: 26,
+              height: 16,
+              borderRadius: 6,
+              border: '1px solid var(--border)',
+              background: 'var(--bg-800)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: podeDescer ? 'pointer' : 'default',
+              color: podeDescer ? 'var(--text-secondary)' : 'var(--text-tertiary)',
+              opacity: podeDescer ? 1 : 0.35,
+              padding: 0,
+            }}
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {!showReagendar && (
         <button

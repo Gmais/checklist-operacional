@@ -9,6 +9,7 @@ import {
   concluirOcorrencia,
   reabrirOcorrencia,
   reagendarOcorrencia,
+  trocarOrdemAtividades,
 } from '../lib/dataService'
 
 function formatarDataLonga(date) {
@@ -69,13 +70,30 @@ export default function HojePage() {
     carregar()
   }
 
+  async function handleMover(lista, ocorrencia, direcao) {
+    const idx = lista.findIndex((o) => o.id === ocorrencia.id)
+    const alvoIdx = idx + direcao
+    if (alvoIdx < 0 || alvoIdx >= lista.length) return
+    const atual = lista[idx].checklist_atividades
+    const alvo = lista[alvoIdx].checklist_atividades
+    if (!atual || !alvo) return
+    await trocarOrdemAtividades(atual.id, atual.ordem ?? idx, alvo.id, alvo.ordem ?? alvoIdx)
+    carregar()
+  }
+
   const todasOcorrencias = [...ocorrenciasAtrasadas, ...ocorrenciasHoje]
   const filtradas =
     unidadeAtiva === 'todas'
       ? todasOcorrencias
       : todasOcorrencias.filter((o) => o.checklist_atividades?.unidade_id === unidadeAtiva)
 
-  const pendentes = filtradas.filter((o) => o.status === 'pendente')
+  const pendentes = filtradas
+    .filter((o) => o.status === 'pendente')
+    .sort((a, b) => {
+      const oa = a.checklist_atividades?.ordem ?? 999999
+      const ob = b.checklist_atividades?.ordem ?? 999999
+      return oa - ob
+    })
   const concluidas = filtradas.filter((o) => o.status === 'concluida')
   const atrasadasIds = new Set(ocorrenciasAtrasadas.map((o) => o.id))
 
@@ -118,7 +136,7 @@ export default function HojePage() {
             <section style={{ marginBottom: 24 }}>
               <SectionLabel>Pendentes ({pendentes.length})</SectionLabel>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {pendentes.map((oc) => (
+                {pendentes.map((oc, idx) => (
                   <ActivityCard
                     key={oc.id}
                     ocorrencia={oc}
@@ -126,6 +144,10 @@ export default function HojePage() {
                     onConcluir={handleConcluir}
                     onReabrir={handleReabrir}
                     onReagendar={handleReagendar}
+                    onMoverCima={(o) => handleMover(pendentes, o, -1)}
+                    onMoverBaixo={(o) => handleMover(pendentes, o, 1)}
+                    podeSubir={idx > 0}
+                    podeDescer={idx < pendentes.length - 1}
                   />
                 ))}
               </div>

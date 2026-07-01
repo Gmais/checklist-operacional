@@ -34,13 +34,25 @@ export async function deleteFeriado(id) {
 export async function fetchAtividades(unidadeId = null) {
   let query = supabase.from('checklist_atividades').select('*, checklist_unidades(nome, cor)').eq('ativo', true)
   if (unidadeId) query = query.eq('unidade_id', unidadeId)
-  const { data, error } = await query.order('nome')
+  const { data, error } = await query.order('ordem', { ascending: true, nullsFirst: false }).order('nome')
   if (error) throw error
   return data
 }
 
 export async function addAtividade(atividade) {
-  const { data, error } = await supabase.from('checklist_atividades').insert(atividade).select().single()
+  const { data: maxRow } = await supabase
+    .from('checklist_atividades')
+    .select('ordem')
+    .order('ordem', { ascending: false, nullsFirst: false })
+    .limit(1)
+    .maybeSingle()
+  const proximaOrdem = (maxRow?.ordem || 0) + 1
+
+  const { data, error } = await supabase
+    .from('checklist_atividades')
+    .insert({ ...atividade, ordem: proximaOrdem })
+    .select()
+    .single()
   if (error) throw error
   return data
 }
@@ -54,6 +66,18 @@ export async function updateAtividade(id, patch) {
     .single()
   if (error) throw error
   return data
+}
+
+// Troca a posição de duas atividades na ordem de execução (usado pelos
+// botões subir/descer da aba Hoje). A ordem fica salva na atividade, então
+// vale para todas as ocorrências futuras dela, não só a do dia.
+export async function trocarOrdemAtividades(idA, ordemA, idB, ordemB) {
+  const [r1, r2] = await Promise.all([
+    supabase.from('checklist_atividades').update({ ordem: ordemB, updated_at: new Date().toISOString() }).eq('id', idA),
+    supabase.from('checklist_atividades').update({ ordem: ordemA, updated_at: new Date().toISOString() }).eq('id', idB),
+  ])
+  if (r1.error) throw r1.error
+  if (r2.error) throw r2.error
 }
 
 export async function deleteAtividade(id) {
