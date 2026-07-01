@@ -128,7 +128,7 @@ export async function sincronizarOcorrencias(rangeStartISO, rangeEndISO) {
 export async function fetchOcorrenciasDoDia(dataISO, unidadeId = null) {
   let query = supabase
     .from('checklist_ocorrencias')
-    .select('*, checklist_atividades(id, nome, descricao, frequencia, unidade_id, checklist_unidades(nome, cor))')
+    .select('*, checklist_atividades(id, nome, descricao, frequencia, unidade_id, ordem, checklist_unidades(nome, cor))')
     .eq('data_agendada', dataISO)
 
   const { data, error } = await query
@@ -144,7 +144,7 @@ export async function fetchOcorrenciasDoDia(dataISO, unidadeId = null) {
 export async function fetchOcorrenciasAtrasadas(hojeISO, unidadeId = null) {
   let query = supabase
     .from('checklist_ocorrencias')
-    .select('*, checklist_atividades(id, nome, descricao, frequencia, unidade_id, checklist_unidades(nome, cor))')
+    .select('*, checklist_atividades(id, nome, descricao, frequencia, unidade_id, ordem, checklist_unidades(nome, cor))')
     .eq('status', 'pendente')
     .lt('data_agendada', hojeISO)
 
