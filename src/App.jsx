@@ -3,6 +3,7 @@ import HojePage from './pages/HojePage'
 import ProximosPage from './pages/ProximosPage'
 import AtividadesPage from './pages/AtividadesPage'
 import FeriadosPage from './pages/FeriadosPage'
+import ManutencaoOculta from './components/ManutencaoOculta'
 
 const TABS = [
   { key: 'hoje', label: 'Hoje', icon: HojeIcon },
@@ -83,23 +84,25 @@ function TopBar() {
         width: '100%',
       }}
     >
-      <div
-        style={{
-          width: 34,
-          height: 34,
-          borderRadius: 9,
-          background: 'var(--amber)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 900,
-          color: '#0a0a0a',
-          fontSize: 15,
-          flexShrink: 0,
-        }}
-      >
-        ✓
-      </div>
+      <ManutencaoOculta>
+        <div
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 9,
+            background: 'var(--amber)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 900,
+            color: '#0a0a0a',
+            fontSize: 15,
+            flexShrink: 0,
+          }}
+        >
+          ✓
+        </div>
+      </ManutencaoOculta>
       <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: 0.2 }}>Checklist Operacional</span>
     </header>
   )

@@ -171,3 +171,34 @@ export async function reagendarOcorrencia(id, novaDataISO) {
   if (error) throw error
   return data
 }
+
+// ---------- Manutenção ----------
+
+// Conta ocorrências pendentes cuja data agendada já passou (atrasadas).
+// Usado pela tela de manutenção para mostrar quantos itens serão removidos
+// antes de confirmar a exclusão.
+export async function contarOcorrenciasAtrasadas() {
+  const hojeISO = toISODate(new Date())
+  const { count, error } = await supabase
+    .from('checklist_ocorrencias')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'pendente')
+    .lt('data_agendada', hojeISO)
+  if (error) throw error
+  return count || 0
+}
+
+// Remove definitivamente as ocorrências pendentes atrasadas (data_agendada < hoje).
+// Não mexe em ocorrências futuras pendentes nem em ocorrências já concluídas —
+// preserva o histórico normalmente.
+export async function limparOcorrenciasAtrasadas() {
+  const hojeISO = toISODate(new Date())
+  const { data, error } = await supabase
+    .from('checklist_ocorrencias')
+    .delete()
+    .eq('status', 'pendente')
+    .lt('data_agendada', hojeISO)
+    .select('id')
+  if (error) throw error
+  return data?.length || 0
+}
