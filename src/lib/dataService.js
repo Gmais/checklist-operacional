@@ -69,15 +69,12 @@ export async function updateAtividade(id, patch) {
 }
 
 // Troca a posição de duas atividades na ordem de execução (usado pelos
-// botões subir/descer da aba Hoje). A ordem fica salva na atividade, então
-// vale para todas as ocorrências futuras dela, não só a do dia.
-export async function trocarOrdemAtividades(idA, ordemA, idB, ordemB) {
-  const [r1, r2] = await Promise.all([
-    supabase.from('checklist_atividades').update({ ordem: ordemB, updated_at: new Date().toISOString() }).eq('id', idA),
-    supabase.from('checklist_atividades').update({ ordem: ordemA, updated_at: new Date().toISOString() }).eq('id', idB),
-  ])
-  if (r1.error) throw r1.error
-  if (r2.error) throw r2.error
+// botões subir/descer da aba Hoje). A troca acontece inteira dentro do
+// banco (função trocar_ordem_atividades), lendo o valor atual de "ordem"
+// na hora — evita corrida quando o usuário toca rápido demais.
+export async function trocarOrdemAtividades(idA, idB) {
+  const { error } = await supabase.rpc('trocar_ordem_atividades', { id_a: idA, id_b: idB })
+  if (error) throw error
 }
 
 export async function deleteAtividade(id) {

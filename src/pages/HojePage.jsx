@@ -70,15 +70,23 @@ export default function HojePage() {
     carregar()
   }
 
+  const [movendoId, setMovendoId] = useState(null)
+
   async function handleMover(lista, ocorrencia, direcao) {
+    if (movendoId) return
     const idx = lista.findIndex((o) => o.id === ocorrencia.id)
     const alvoIdx = idx + direcao
     if (alvoIdx < 0 || alvoIdx >= lista.length) return
     const atual = lista[idx].checklist_atividades
     const alvo = lista[alvoIdx].checklist_atividades
     if (!atual || !alvo) return
-    await trocarOrdemAtividades(atual.id, atual.ordem ?? idx, alvo.id, alvo.ordem ?? alvoIdx)
-    carregar()
+    setMovendoId(ocorrencia.id)
+    try {
+      await trocarOrdemAtividades(atual.id, alvo.id)
+      await carregar()
+    } finally {
+      setMovendoId(null)
+    }
   }
 
   const todasOcorrencias = [...ocorrenciasAtrasadas, ...ocorrenciasHoje]
@@ -146,8 +154,8 @@ export default function HojePage() {
                     onReagendar={handleReagendar}
                     onMoverCima={(o) => handleMover(pendentes, o, -1)}
                     onMoverBaixo={(o) => handleMover(pendentes, o, 1)}
-                    podeSubir={idx > 0}
-                    podeDescer={idx < pendentes.length - 1}
+                    podeSubir={idx > 0 && !movendoId}
+                    podeDescer={idx < pendentes.length - 1 && !movendoId}
                   />
                 ))}
               </div>
