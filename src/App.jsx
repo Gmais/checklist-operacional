@@ -3,6 +3,7 @@ import HojePage from './pages/HojePage'
 import ProximosPage from './pages/ProximosPage'
 import AtividadesPage from './pages/AtividadesPage'
 import FeriadosPage from './pages/FeriadosPage'
+import ReparosPage from './pages/ReparosPage'
 import ManutencaoOculta from './components/ManutencaoOculta'
 import AcessoProtegido from './components/AcessoProtegido'
 
@@ -11,6 +12,7 @@ const TABS = [
   { key: 'proximos', label: 'Próximos', icon: ProximosIcon },
   { key: 'atividades', label: 'Atividades', icon: AtividadesIcon },
   { key: 'feriados', label: 'Feriados', icon: FeriadosIcon },
+  { key: 'reparos', label: 'Reparos', icon: ReparosIcon },
 ]
 
 export default function App() {
@@ -33,6 +35,7 @@ export default function App() {
             <FeriadosPage />
           </AcessoProtegido>
         )}
+        {tab === 'reparos' && <ReparosPage />}
       </main>
 
       <nav
@@ -156,6 +159,21 @@ function FeriadosIcon({ active }) {
       <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth={active ? 2.4 : 2} />
       <path d="M3 10h18" stroke="currentColor" strokeWidth={active ? 2.4 : 2} />
       <path d="M8 3v4M16 3v4" stroke="currentColor" strokeWidth={active ? 2.4 : 2} strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function ReparosIcon({ active }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M14.7 6.3a4 4 0 0 1 5.4 5.4l-7.8 7.8a2 2 0 0 1-2.8 0l-2.6-2.6a2 2 0 0 1 0-2.8l7.8-7.8Z"
+        stroke="currentColor"
+        strokeWidth={active ? 2.4 : 2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M9 12l-4.5 4.5a2 2 0 0 0 0 2.8l.2.2a2 2 0 0 0 2.8 0L12 15" stroke="currentColor" strokeWidth={active ? 2.4 : 2} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }

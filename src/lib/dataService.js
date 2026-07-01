@@ -193,6 +193,49 @@ export async function reagendarOcorrencia(id, novaDataISO) {
   return data
 }
 
+// ---------- Reparos ----------
+
+export async function fetchReparos() {
+  const { data, error } = await supabase
+    .from('checklist_reparos')
+    .select('*, checklist_unidades(nome, cor)')
+    .order('concluido')
+    .order('data_execucao', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export async function addReparo(reparo) {
+  const { data, error } = await supabase.from('checklist_reparos').insert(reparo).select().single()
+  if (error) throw error
+  return data
+}
+
+export async function updateReparo(id, patch) {
+  const { data, error } = await supabase
+    .from('checklist_reparos')
+    .update({ ...patch, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function alternarConcluidoReparo(id, concluido) {
+  const { error } = await supabase
+    .from('checklist_reparos')
+    .update({ concluido, updated_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteReparo(id) {
+  const { error } = await supabase.from('checklist_reparos').delete().eq('id', id)
+  if (error) throw error
+}
+
 // ---------- Manutenção ----------
 
 // Conta ocorrências pendentes cuja data agendada já passou (atrasadas).
