@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { FREQUENCIAS, DIAS_SEMANA_OPCOES, SEMANA_DO_MES_OPCOES, toISODate } from '../lib/recurrence'
 import { fetchUnidades, fetchAtividades, addAtividade, updateAtividade, deleteAtividade } from '../lib/dataService'
 
@@ -27,6 +27,13 @@ export default function AtividadesPage() {
   const [saving, setSaving] = useState(false)
   const [erro, setErro] = useState(null)
   const [filtroUnidade, setFiltroUnidade] = useState('todas')
+  const formRef = useRef(null)
+
+  useEffect(() => {
+    if (showForm) {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [showForm])
 
   const carregar = useCallback(async () => {
     setLoading(true)
@@ -173,6 +180,7 @@ export default function AtividadesPage() {
 
       {showForm && (
         <div
+          ref={formRef}
           style={{
             background: 'var(--bg-900)',
             border: '1px solid var(--border)',
