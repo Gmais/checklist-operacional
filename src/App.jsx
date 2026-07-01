@@ -4,6 +4,7 @@ import ProximosPage from './pages/ProximosPage'
 import AtividadesPage from './pages/AtividadesPage'
 import FeriadosPage from './pages/FeriadosPage'
 import ManutencaoOculta from './components/ManutencaoOculta'
+import AcessoProtegido from './components/AcessoProtegido'
 
 const TABS = [
   { key: 'hoje', label: 'Hoje', icon: HojeIcon },
@@ -22,8 +23,16 @@ export default function App() {
       <main style={{ flex: 1 }}>
         {tab === 'hoje' && <HojePage />}
         {tab === 'proximos' && <ProximosPage />}
-        {tab === 'atividades' && <AtividadesPage />}
-        {tab === 'feriados' && <FeriadosPage />}
+        {tab === 'atividades' && (
+          <AcessoProtegido>
+            <AtividadesPage />
+          </AcessoProtegido>
+        )}
+        {tab === 'feriados' && (
+          <AcessoProtegido>
+            <FeriadosPage />
+          </AcessoProtegido>
+        )}
       </main>
 
       <nav

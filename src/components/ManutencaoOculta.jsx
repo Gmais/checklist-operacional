@@ -1,11 +1,6 @@
 import { useRef, useState } from 'react'
 import { contarOcorrenciasAtrasadas, limparOcorrenciasAtrasadas } from '../lib/dataService'
-
-// Senha dinâmica: dia do mês atual, com e sem zero à esquerda (ex: dia 5 aceita "5" e "05").
-function senhaValidaHoje() {
-  const dia = new Date().getDate()
-  return [String(dia), String(dia).padStart(2, '0')]
-}
+import { validarSenhaDoDia } from '../lib/senha'
 
 const TAPS_PARA_ABRIR = 5
 const JANELA_MS = 2500
@@ -46,7 +41,7 @@ function ModalManutencao({ onClose }) {
 
   async function validarSenha(e) {
     e.preventDefault()
-    if (!senhaValidaHoje().includes(senha.trim())) {
+    if (!validarSenhaDoDia(senha)) {
       setErro('Código inválido')
       setSenha('')
       return
