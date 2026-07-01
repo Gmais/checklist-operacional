@@ -96,6 +96,12 @@ export function calcularDatasPrevistas(atividade, rangeStart, rangeEnd) {
     return datas
   }
 
+  if (atividade.frequencia === 'unica') {
+    // Recado: aparece uma única vez, exatamente na data escolhida no cadastro.
+    if (inicio >= start && inicio <= rangeEnd) datas.push(new Date(inicio))
+    return datas
+  }
+
   if (atividade.frequencia === 'dias_especificos') {
     const dias = atividade.dias_semana || []
     const d = new Date(start)
@@ -133,6 +139,7 @@ export function nomeDiaSemana(idx) {
 }
 
 export const FREQUENCIAS = [
+  { value: 'unica', label: 'Recado' },
   { value: 'diaria', label: 'Diária' },
   { value: 'semanal', label: 'Semanal' },
   { value: 'quinzenal', label: 'Quinzenal' },

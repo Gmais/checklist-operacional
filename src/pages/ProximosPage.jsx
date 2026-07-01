@@ -11,6 +11,7 @@ const PERIODOS = [
 ]
 
 const FREQ_LABEL = {
+  unica: 'Recado',
   diaria: 'Diária',
   semanal: 'Semanal',
   quinzenal: 'Quinzenal',
@@ -21,6 +22,7 @@ const FREQ_LABEL = {
 }
 
 const TIPOS_FREQUENCIA = [
+  { value: 'unica', label: 'Recado' },
   { value: 'diaria', label: 'Diária' },
   { value: 'semanal', label: 'Semanal' },
   { value: 'quinzenal', label: 'Quinzenal' },

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 const FREQ_LABEL = {
+  unica: 'Recado',
   diaria: 'Diária',
   semanal: 'Semanal',
   quinzenal: 'Quinzenal',

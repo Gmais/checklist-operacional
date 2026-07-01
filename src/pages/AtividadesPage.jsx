@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { FREQUENCIAS, DIAS_SEMANA_OPCOES, SEMANA_DO_MES_OPCOES, toISODate } from '../lib/recurrence'
+import { FREQUENCIAS, DIAS_SEMANA_OPCOES, SEMANA_DO_MES_OPCOES, toISODate, parseISODate } from '../lib/recurrence'
 import { fetchUnidades, fetchAtividades, addAtividade, updateAtividade, deleteAtividade } from '../lib/dataService'
 
 const FREQ_LABEL = Object.fromEntries(FREQUENCIAS.map((f) => [f.value, f.label]))
 const DIA_LABEL = Object.fromEntries(DIAS_SEMANA_OPCOES.map((d) => [d.value, d.label]))
 const SEMANA_LABEL = Object.fromEntries(SEMANA_DO_MES_OPCOES.map((s) => [s.value, s.label]))
+
+function formatarDataCurta(iso) {
+  return parseISODate(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+}
 
 const emptyForm = {
   nome: '',
@@ -27,6 +31,7 @@ export default function AtividadesPage() {
   const [saving, setSaving] = useState(false)
   const [erro, setErro] = useState(null)
   const [filtroUnidade, setFiltroUnidade] = useState('todas')
+  const [formSimplificado, setFormSimplificado] = useState(false)
   const formRef = useRef(null)
 
   useEffect(() => {
@@ -58,6 +63,15 @@ export default function AtividadesPage() {
     setForm({ ...emptyForm, unidade_id: unidades[0]?.id || '' })
     setEditingId(null)
     setShowForm(true)
+    setFormSimplificado(false)
+    setErro(null)
+  }
+
+  function abrirRecado() {
+    setForm({ ...emptyForm, unidade_id: unidades[0]?.id || '', frequencia: 'unica' })
+    setEditingId(null)
+    setShowForm(true)
+    setFormSimplificado(true)
     setErro(null)
   }
 
@@ -74,6 +88,7 @@ export default function AtividadesPage() {
     })
     setEditingId(atividade.id)
     setShowForm(true)
+    setFormSimplificado(atividade.frequencia === 'unica')
     setErro(null)
   }
 
@@ -134,6 +149,7 @@ export default function AtividadesPage() {
     filtroUnidade === 'todas' ? atividades : atividades.filter((a) => a.unidade_id === filtroUnidade)
 
   function descricaoRecorrencia(a) {
+    if (a.frequencia === 'unica') return `Aparece em ${formatarDataCurta(a.data_inicio)}, uma vez só`
     if (a.frequencia === 'diaria') return 'Todo dia útil'
     if (a.frequencia === 'semanal') return `Toda ${DIA_LABEL[a.dia_semana]}-feira`
     if (a.frequencia === 'quinzenal') return `A cada 2 semanas, ${DIA_LABEL[a.dia_semana]}-feira`
@@ -146,29 +162,51 @@ export default function AtividadesPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '20px 16px 100px' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 12 }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}>
         <div>
           <p style={{ margin: 0, fontSize: 13, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 700 }}>
             Cadastro
           </p>
           <h1 style={{ margin: '2px 0 0', fontSize: 24, fontWeight: 800 }}>Atividades</h1>
         </div>
-        <button
-          onClick={abrirNovo}
-          style={{
-            background: 'var(--amber)',
-            color: '#0a0a0a',
-            border: 'none',
-            borderRadius: 10,
-            padding: '10px 16px',
-            fontWeight: 800,
-            fontSize: 14,
-            cursor: 'pointer',
-            flexShrink: 0,
-          }}
-        >
-          + Nova
-        </button>
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+          <button
+            onClick={abrirRecado}
+            style={{
+              background: 'transparent',
+              color: 'var(--text-primary)',
+              border: '1.5px solid var(--border)',
+              borderRadius: 10,
+              padding: '10px 14px',
+              fontWeight: 800,
+              fontSize: 14,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <path d="M4 4h16v12H8l-4 4V4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Recado
+          </button>
+          <button
+            onClick={abrirNovo}
+            style={{
+              background: 'var(--amber)',
+              color: '#0a0a0a',
+              border: 'none',
+              borderRadius: 10,
+              padding: '10px 16px',
+              fontWeight: 800,
+              fontSize: 14,
+              cursor: 'pointer',
+            }}
+          >
+            + Nova
+          </button>
+        </div>
       </header>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 18, overflowX: 'auto' }}>
@@ -190,8 +228,19 @@ export default function AtividadesPage() {
           }}
         >
           <h2 style={{ margin: '0 0 14px', fontSize: 16, fontWeight: 800 }}>
-            {editingId ? 'Editar atividade' : 'Nova atividade'}
+            {formSimplificado
+              ? editingId
+                ? 'Editar recado'
+                : 'Novo recado'
+              : editingId
+                ? 'Editar atividade'
+                : 'Nova atividade'}
           </h2>
+          {formSimplificado && (
+            <p style={{ margin: '-8px 0 14px', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              Um aviso pontual: aparece só uma vez, no dia que você escolher abaixo.
+            </p>
+          )}
 
           {erro && <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 0 }}>{erro}</p>}
 
@@ -224,15 +273,17 @@ export default function AtividadesPage() {
             </select>
           </Field>
 
-          <Field label="Frequência">
-            <select value={form.frequencia} onChange={(e) => setForm({ ...form, frequencia: e.target.value })} style={inputStyle}>
-              {FREQUENCIAS.map((f) => (
-                <option key={f.value} value={f.value}>
-                  {f.label}
-                </option>
-              ))}
-            </select>
-          </Field>
+          {!formSimplificado && (
+            <Field label="Frequência">
+              <select value={form.frequencia} onChange={(e) => setForm({ ...form, frequencia: e.target.value })} style={inputStyle}>
+                {FREQUENCIAS.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
 
           {['semanal', 'quinzenal'].includes(form.frequencia) && (
             <Field label="Dia da semana">
@@ -303,7 +354,7 @@ export default function AtividadesPage() {
             </>
           )}
 
-          <Field label="Começa a valer a partir de">
+          <Field label={formSimplificado ? 'Vai aparecer no dia' : 'Começa a valer a partir de'}>
             <input
               type="date"
               value={form.data_inicio}
